@@ -5,7 +5,7 @@ import crypto from 'crypto';
 import { CodeResponse, OAuth2Options } from '../@types';
 import { OPEN_ID } from '../config/auth.config';
 import { User } from '../users/user.class';
-import { Provider } from '../strategies';
+import { Provider } from '../providers';
 
 export type ValidateFunc = (accessToken: string, data: any) => Promise<User>;
 

@@ -3,11 +3,11 @@ import { JwtModule } from '@nestjs/jwt';
 import path from 'path';
 import fs from 'fs';
 
-import { GoogleStrategy } from '../strategies/google.strategy';
-import { AuthenticatorService } from '../strategies';
+import { AuthenticatorService } from '../authenticator/authenticator.service';
 import { UsersModule } from '../users/users.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { Strategies } from '../providers';
 
 const getKey = (name: 'private' | 'public') =>
   fs.readFileSync(path.join(__dirname, `../../certs/${name}.pem`));
@@ -23,7 +23,7 @@ const getKey = (name: 'private' | 'public') =>
       },
     }),
   ],
-  providers: [AuthService, GoogleStrategy, AuthenticatorService],
+  providers: [AuthService, ...Strategies, AuthenticatorService],
   controllers: [AuthController],
 })
 export class AuthModule {}

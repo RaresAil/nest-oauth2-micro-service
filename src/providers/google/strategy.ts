@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
 
-import { ValidateFunc } from '../classes/OAuth2Client';
-import { AuthenticatorService, providers } from '.';
-import googleConfig from '../config/google.config';
-import { AuthService } from '../auth/auth.service';
-import { OPEN_ID } from '../config/auth.config';
-import { User } from '../users/user.class';
+import { AuthenticatorService } from '../../authenticator/authenticator.service';
+import { ValidateFunc } from '../../classes/OAuth2Client';
+import { AuthService } from '../../auth/auth.service';
+import { OPEN_ID } from '../../config/auth.config';
+import { User } from '../../users/user.class';
+import googleConfig from './config';
+import providers from '..';
 
 @Injectable()
 export class GoogleStrategy {
@@ -23,8 +24,8 @@ export class GoogleStrategy {
           },
           auth: {
             authorizeHost: 'https://accounts.google.com',
-            authorizePath: '/o/oauth2/v2/auth',
             tokenHost: 'https://www.googleapis.com',
+            authorizePath: '/o/oauth2/v2/auth',
             tokenPath: '/oauth2/v4/token',
             userInfo: OPEN_ID,
           },

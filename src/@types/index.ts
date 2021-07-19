@@ -1,4 +1,4 @@
-import { Provider } from '../strategies';
+import { Provider } from '../providers';
 
 export interface OAuth2Options {
   name: Provider;

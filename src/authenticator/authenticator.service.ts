@@ -11,7 +11,7 @@ import {
 import OAuth2Client, { ValidateFunc } from '../classes/OAuth2Client';
 import { CodeResponse, OAuth2Options } from '../@types';
 import authConfig from '../config/auth.config';
-import { ValueOf } from '../utils/types';
+import { Provider } from '../providers';
 
 @Injectable()
 export class AuthenticatorService implements OnModuleInit {
@@ -109,9 +109,3 @@ export class AuthenticatorService implements OnModuleInit {
     return true;
   }
 }
-
-export const providers = {
-  Google: 'google',
-} as const;
-
-export type Provider = ValueOf<typeof providers>;

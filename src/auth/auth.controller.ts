@@ -1,10 +1,11 @@
 import { Controller, Get, InternalServerErrorException } from '@nestjs/common';
 
+import googleConfig from '../providers/google/config';
+
 import { AuthMethod, methods } from '../meta/auth-method.decorator';
-import googleConfig from '../config/google.config';
 import authConfig from '../config/auth.config';
-import { providers } from '../strategies';
 import { versions } from '../utils/app';
+import providers from '../providers';
 
 @Controller({
   path: authConfig.prefix,

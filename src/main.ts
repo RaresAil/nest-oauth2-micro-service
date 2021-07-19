@@ -1,5 +1,6 @@
 import { VersioningType } from '@nestjs/common';
 import { fastifyHelmet } from 'fastify-helmet';
+import fastifyCookie from 'fastify-cookie';
 import { NestFactory } from '@nestjs/core';
 import {
   NestFastifyApplication,
@@ -20,6 +21,9 @@ async function bootstrap() {
   });
 
   await app.register(fastifyHelmet);
+  await app.register(fastifyCookie, {
+    secret: process.env.SESSION_SECRET,
+  });
 
   await app.listen(3000);
 }

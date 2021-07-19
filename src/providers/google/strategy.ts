@@ -2,16 +2,16 @@ import { Injectable } from '@nestjs/common';
 
 import { AuthenticatorService } from '../../authenticator/authenticator.service';
 import { ValidateFunc } from '../../classes/OAuth2Client';
-import { AuthService } from '../../auth/auth.service';
+import { UsersService } from '../../users/users.service';
 import { OPEN_ID } from '../../config/auth.config';
 import { User } from '../../users/user.class';
+import { providers } from '../constants';
 import googleConfig from './config';
-import providers from '..';
 
 @Injectable()
 export class GoogleStrategy {
   constructor(
-    private authService: AuthService,
+    private readonly usersService: UsersService,
     authenticator: AuthenticatorService,
   ) {
     authenticator.use(
@@ -41,7 +41,7 @@ export class GoogleStrategy {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     ...[_, data]: Parameters<ValidateFunc>
   ): ReturnType<ValidateFunc> {
-    const existingUser = await this.authService.getUser(
+    const existingUser = await this.usersService.getUser(
       data.id,
       providers.Google,
     );
@@ -49,7 +49,7 @@ export class GoogleStrategy {
       return existingUser;
     }
 
-    const user = await this.authService.saveUser(
+    const user = await this.usersService.saveUser(
       new User(
         data.id,
         data.given_name,

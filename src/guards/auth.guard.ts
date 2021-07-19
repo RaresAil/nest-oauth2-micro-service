@@ -1,6 +1,5 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { ModuleRef, Reflector } from '@nestjs/core';
-import { JwtService } from '@nestjs/jwt';
 import {
   ExecutionContext,
   OnModuleInit,
@@ -14,7 +13,6 @@ import { AuthenticatorService } from '../authenticator/authenticator.service';
 @Injectable()
 export class AuthGuard implements CanActivate, OnModuleInit {
   private authenticator!: AuthenticatorService;
-  private jwtService!: JwtService;
 
   constructor(
     private reflector: Reflector,
@@ -23,9 +21,6 @@ export class AuthGuard implements CanActivate, OnModuleInit {
 
   public onModuleInit() {
     this.authenticator = this.moduleRef.get(AuthenticatorService, {
-      strict: false,
-    });
-    this.jwtService = this.moduleRef.get(JwtService, {
       strict: false,
     });
   }
@@ -41,7 +36,7 @@ export class AuthGuard implements CanActivate, OnModuleInit {
     const reply = http.getResponse<FastifyReply>();
 
     if (!authMethod) {
-      return this.handleSession(request);
+      return this.authenticator.handleSession(request, reply);
     }
 
     switch (authMethod.method) {
@@ -56,9 +51,5 @@ export class AuthGuard implements CanActivate, OnModuleInit {
       default:
         return false;
     }
-  }
-
-  private async handleSession(request: FastifyRequest): Promise<boolean> {
-    return false;
   }
 }

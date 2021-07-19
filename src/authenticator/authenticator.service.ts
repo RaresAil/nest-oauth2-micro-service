@@ -1,3 +1,4 @@
+import { CookieSerializeOptions } from 'fastify-cookie';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { AuthorizationCode } from 'simple-oauth2';
 import { JwtService } from '@nestjs/jwt';
@@ -10,15 +11,32 @@ import {
 
 import OAuth2Client, { ValidateFunc } from '../classes/OAuth2Client';
 import { CodeResponse, OAuth2Options } from '../@types';
+import { UsersService } from '../users/users.service';
+import appConfig from '../config/app.config.json';
+import { Provider } from '../providers/constants';
 import authConfig from '../config/auth.config';
-import { Provider } from '../providers';
+import { User } from '../users/user.class';
+
+const isProduction = appConfig.NODE_ENV !== 'development';
 
 @Injectable()
 export class AuthenticatorService implements OnModuleInit {
+  private cookieName = 'session' as const;
+  private cookieOptions: CookieSerializeOptions = {
+    httpOnly: true,
+    signed: true,
+    secure: isProduction,
+    maxAge: 21600 * 1000,
+    path: '/',
+  };
+
   private clients: OAuth2Client[] = [];
   private jwtService!: JwtService;
 
-  constructor(private readonly moduleRef: ModuleRef) {}
+  constructor(
+    private readonly moduleRef: ModuleRef,
+    private readonly usersService: UsersService,
+  ) {}
 
   public onModuleInit() {
     this.jwtService = this.moduleRef.get(JwtService, {
@@ -68,7 +86,7 @@ export class AuthenticatorService implements OnModuleInit {
     name: Provider,
     request: FastifyRequest,
     reply: FastifyReply,
-  ): Promise<true> {
+  ): Promise<boolean> {
     const client = this.clients.find(({ Name }) => Name === name);
     if (!client) {
       throw new Error(`No client found with name: ${name}`);
@@ -101,9 +119,33 @@ export class AuthenticatorService implements OnModuleInit {
         throw new UnauthorizedException();
       }
 
+      reply.setCookie(this.cookieName, user.serialize(), this.cookieOptions);
       reply.redirect(307, authConfig.homePage);
+      return true;
     } catch {
       reply.redirect(307, authConfig.loginPage);
+      throw new UnauthorizedException();
+    }
+  }
+
+  public async handleSession(
+    request: FastifyRequest,
+    replay: FastifyReply,
+  ): Promise<boolean> {
+    const { valid, value } =
+      request.unsignCookie(request.cookies[this.cookieName] ?? '') ??
+      ({} as ReturnType<typeof request['unsignCookie']>);
+
+    if (!valid || !value) {
+      replay.clearCookie(this.cookieName);
+      throw new UnauthorizedException();
+    }
+
+    const { id, provider } = User.deserialize(value);
+    const user = await this.usersService.getUser(id, provider);
+    if (!user) {
+      replay.clearCookie(this.cookieName);
+      throw new UnauthorizedException();
     }
 
     return true;

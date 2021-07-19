@@ -1,4 +1,4 @@
-import providers, { Provider } from '../providers';
+import { Provider, providers } from '../providers/constants';
 
 export type DeserializedUser = {
   id: string;

@@ -1,4 +1,4 @@
-import { Provider } from '../providers';
+import { Provider } from '../providers/constants';
 
 export interface OAuth2Options {
   name: Provider;

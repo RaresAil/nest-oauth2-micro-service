@@ -2,14 +2,17 @@ import { Injectable } from '@nestjs/common';
 
 import { ValidateFunc } from '../classes/OAuth2Client';
 import googleConfig from '../../config/google.config';
+import { AuthenticatorService, providers } from './';
 import { OPEN_ID } from '../../config/auth.config';
 import { AuthService } from '../auth.service';
 import { User } from '../../users/user.class';
-import authenticator, { providers } from './';
 
 @Injectable()
 export class GoogleStrategy {
-  constructor(private authService: AuthService) {
+  constructor(
+    private authService: AuthService,
+    authenticator: AuthenticatorService,
+  ) {
     authenticator.use(
       {
         name: providers.Google,

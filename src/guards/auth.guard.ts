@@ -1,15 +1,36 @@
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { FastifyRequest, FastifyReply } from 'fastify';
-import { Reflector } from '@nestjs/core';
+import { ModuleRef, Reflector } from '@nestjs/core';
+import { JwtService } from '@nestjs/jwt';
+import {
+  ExecutionContext,
+  OnModuleInit,
+  CanActivate,
+  Injectable,
+} from '@nestjs/common';
 
 import { AuthMethodData, methods, name } from '../meta/auth-method.decorator';
-import authenticator from '../auth/strategies';
+import { AuthenticatorService } from '../auth/strategies';
 
 @Injectable()
-export class AuthGuard implements CanActivate {
-  constructor(private reflector: Reflector) {}
+export class AuthGuard implements CanActivate, OnModuleInit {
+  private authenticator!: AuthenticatorService;
+  private jwtService!: JwtService;
 
-  async canActivate(context: ExecutionContext): Promise<boolean> {
+  constructor(
+    private reflector: Reflector,
+    private readonly moduleRef: ModuleRef,
+  ) {}
+
+  public onModuleInit() {
+    this.authenticator = this.moduleRef.get(AuthenticatorService, {
+      strict: false,
+    });
+    this.jwtService = this.moduleRef.get(JwtService, {
+      strict: false,
+    });
+  }
+
+  public async canActivate(context: ExecutionContext): Promise<boolean> {
     const authMethod = this.reflector.get<AuthMethodData>(
       name,
       context.getHandler(),
@@ -25,9 +46,9 @@ export class AuthGuard implements CanActivate {
 
     switch (authMethod.method) {
       case methods.Authorize:
-        return authenticator.redirectToAuth(authMethod.provider, reply);
+        return this.authenticator.redirectToAuth(authMethod.provider, reply);
       case methods.Callback:
-        return authenticator.handleCallback(
+        return this.authenticator.handleCallback(
           authMethod.provider,
           request,
           reply,

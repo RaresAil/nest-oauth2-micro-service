@@ -14,7 +14,3 @@ import { AuthGuard } from './guards/auth.guard';
   ],
 })
 export class AppModule {}
-
-export const versions = {
-  v1: '1',
-};

@@ -1,4 +1,5 @@
 import { AccessToken, AuthorizationCode } from 'simple-oauth2';
+import { JwtService } from '@nestjs/jwt';
 import crypto from 'crypto';
 
 import { CodeResponse, OAuth2Options } from '../@types';
@@ -9,6 +10,9 @@ import { Provider } from '../strategies';
 export type ValidateFunc = (accessToken: string, data: any) => Promise<User>;
 
 export default class OAuth2Client {
+  private readonly stateLength = 32 as const;
+  private jwtService: JwtService;
+
   public get Name(): Provider {
     return this.options.name.toString() as Provider;
   }
@@ -19,14 +23,25 @@ export default class OAuth2Client {
     private readonly validate: ValidateFunc,
   ) {}
 
-  public generateAuthorizationUri(): string {
-    const state = crypto.randomBytes(32).toString('hex');
+  public setJwtService(jwtService: JwtService): void {
+    this.jwtService = jwtService;
+  }
+
+  public async generateAuthorizationUri(): Promise<string> {
+    if (!this.jwtService) {
+      throw new Error('JwtService not set');
+    }
+
+    const encodedState = await this.jwtService.signAsync({
+      state: crypto.randomBytes(this.stateLength).toString('hex'),
+    });
+
     const options = {
       ...(this.options.callbackUriParams ?? {}),
       ...{
         redirect_uri: this.options.callbackUri,
         scope: this.options.scope,
-        state: state,
+        state: encodedState,
       },
     };
 
@@ -34,6 +49,15 @@ export default class OAuth2Client {
   }
 
   public async getToken(codeResponse: CodeResponse): Promise<AccessToken> {
+    if (!this.jwtService) {
+      throw new Error('JwtService not set');
+    }
+
+    const realState = await this.jwtService.verifyAsync(codeResponse.state);
+    if (Buffer.from(realState.state, 'hex').byteLength !== this.stateLength) {
+      throw new Error('Invalid state');
+    }
+
     try {
       const accessToken = await this.authorizationCode.getToken({
         redirect_uri: this.options.callbackUri,

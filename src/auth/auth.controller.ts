@@ -4,7 +4,7 @@ import { AuthMethod, methods } from '../meta/auth-method.decorator';
 import googleConfig from '../config/google.config';
 import authConfig from '../config/auth.config';
 import { providers } from './strategies';
-import { versions } from '../app.module';
+import { versions } from '../utils/app';
 
 @Controller({
   path: authConfig.prefix,

@@ -1,20 +1,31 @@
-import { FastifyPluginAsync, FastifyReply, FastifyRequest } from 'fastify';
-import { UnauthorizedException } from '@nestjs/common';
+import { FastifyReply, FastifyRequest } from 'fastify';
 import { AuthorizationCode } from 'simple-oauth2';
+import { JwtService } from '@nestjs/jwt';
+import { ModuleRef } from '@nestjs/core';
+import {
+  UnauthorizedException,
+  OnModuleInit,
+  Injectable,
+} from '@nestjs/common';
 
 import OAuth2Client, { ValidateFunc } from '../classes/OAuth2Client';
 import { CodeResponse, OAuth2Options } from '../@types';
 import authConfig from '../../config/auth.config';
 import { ValueOf } from '../../utils/types';
 
-class Authenticator {
-  private app?: Parameters<FastifyPluginAsync>['0'] = null;
+@Injectable()
+export class AuthenticatorService implements OnModuleInit {
   private clients: OAuth2Client[] = [];
+  private jwtService!: JwtService;
 
-  public initialize(): FastifyPluginAsync {
-    return async (fastify) => {
-      this.app = fastify;
-    };
+  constructor(private readonly moduleRef: ModuleRef) {}
+
+  public onModuleInit() {
+    this.jwtService = this.moduleRef.get(JwtService, {
+      strict: false,
+    });
+
+    this.clients.map((client) => client.setJwtService(this.jwtService));
   }
 
   public use(options: OAuth2Options, validate: ValidateFunc) {
@@ -39,13 +50,17 @@ class Authenticator {
     this.clients.push(oAuthClient);
   }
 
-  public redirectToAuth(name: Provider, reply: FastifyReply): true {
+  public async redirectToAuth(
+    name: Provider,
+    reply: FastifyReply,
+  ): Promise<true> {
     const client = this.clients.find(({ Name }) => Name === name);
     if (!client) {
       throw new Error(`No client found with name: ${name}`);
     }
 
-    reply.redirect(307, client.generateAuthorizationUri());
+    const uri = await client.generateAuthorizationUri();
+    reply.redirect(307, uri);
     return true;
   }
 
@@ -94,9 +109,6 @@ class Authenticator {
     return true;
   }
 }
-
-const authenticator = new Authenticator();
-export default authenticator;
 
 export const providers = {
   Google: 'google',

@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 
 import { ValidateFunc } from '../classes/OAuth2Client';
-import googleConfig from '../../config/google.config';
-import { AuthenticatorService, providers } from './';
-import { OPEN_ID } from '../../config/auth.config';
-import { AuthService } from '../auth.service';
-import { User } from '../../users/user.class';
+import { AuthenticatorService, providers } from '.';
+import googleConfig from '../config/google.config';
+import { AuthService } from '../auth/auth.service';
+import { OPEN_ID } from '../config/auth.config';
+import { User } from '../users/user.class';
 
 @Injectable()
 export class GoogleStrategy {

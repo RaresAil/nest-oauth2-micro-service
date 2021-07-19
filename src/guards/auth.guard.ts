@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 
 import { AuthMethodData, methods, name } from '../meta/auth-method.decorator';
-import { AuthenticatorService } from '../auth/strategies';
+import { AuthenticatorService } from '../strategies';
 
 @Injectable()
 export class AuthGuard implements CanActivate, OnModuleInit {

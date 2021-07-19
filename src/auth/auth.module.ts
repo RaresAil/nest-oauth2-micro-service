@@ -3,9 +3,9 @@ import { JwtModule } from '@nestjs/jwt';
 import path from 'path';
 import fs from 'fs';
 
-import { GoogleStrategy } from './strategies/google.strategy';
+import { GoogleStrategy } from '../strategies/google.strategy';
+import { AuthenticatorService } from '../strategies';
 import { UsersModule } from '../users/users.module';
-import { AuthenticatorService } from './strategies';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 

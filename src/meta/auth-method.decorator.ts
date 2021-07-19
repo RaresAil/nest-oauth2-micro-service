@@ -1,5 +1,5 @@
 import { SetMetadata } from '@nestjs/common';
-import { Provider } from '../auth/strategies';
+import { Provider } from '../strategies';
 import { ValueOf } from '../utils/types';
 
 export const name = 'auth-method' as const;

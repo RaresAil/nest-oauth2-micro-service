@@ -1,4 +1,4 @@
-import { Provider, providers } from '../auth/strategies';
+import { Provider, providers } from '../strategies';
 
 export type DeserializedUser = {
   id: string;

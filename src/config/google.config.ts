@@ -1,4 +1,4 @@
-import { providers } from '../auth/strategies';
+import { providers } from '../strategies';
 import { versions } from '../utils/app';
 import authConfig from './auth.config';
 

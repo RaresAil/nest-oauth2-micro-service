@@ -3,7 +3,7 @@ import { Controller, Get, InternalServerErrorException } from '@nestjs/common';
 import { AuthMethod, methods } from '../meta/auth-method.decorator';
 import googleConfig from '../config/google.config';
 import authConfig from '../config/auth.config';
-import { providers } from './strategies';
+import { providers } from '../strategies';
 import { versions } from '../utils/app';
 
 @Controller({

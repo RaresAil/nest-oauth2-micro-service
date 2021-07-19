@@ -10,8 +10,8 @@ import {
 
 import OAuth2Client, { ValidateFunc } from '../classes/OAuth2Client';
 import { CodeResponse, OAuth2Options } from '../@types';
-import authConfig from '../../config/auth.config';
-import { ValueOf } from '../../utils/types';
+import authConfig from '../config/auth.config';
+import { ValueOf } from '../utils/types';
 
 @Injectable()
 export class AuthenticatorService implements OnModuleInit {

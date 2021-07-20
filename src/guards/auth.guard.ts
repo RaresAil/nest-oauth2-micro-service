@@ -41,7 +41,11 @@ export class AuthGuard implements CanActivate, OnModuleInit {
 
     switch (authMethod.method) {
       case methods.Authorize:
-        return this.authenticator.redirectToAuth(authMethod.provider, reply);
+        return this.authenticator.redirectToAuth(
+          authMethod.provider,
+          reply,
+          request,
+        );
       case methods.Callback:
         return this.authenticator.handleCallback(
           authMethod.provider,

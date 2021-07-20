@@ -3,8 +3,8 @@ import { JwtService } from '@nestjs/jwt';
 import crypto from 'crypto';
 
 import { CodeResponse, OAuth2Options, UserModel } from '../@types';
+import { isProduction, OPEN_ID } from '../utils/app';
 import { Provider } from '../providers/constants';
-import { OPEN_ID } from '../config/auth.config';
 
 export type ValidateFunc = (
   accessToken: string,
@@ -25,11 +25,20 @@ export default class OAuth2Client {
     private readonly validate: ValidateFunc,
   ) {}
 
+  private parseRedirectUri(hostname: string): string {
+    const { callbackUri } = this.options;
+    const protocol = isProduction ? 'https' : 'http';
+
+    return `${protocol}://${hostname}${
+      callbackUri.startsWith('/') ? '' : '/'
+    }${callbackUri}`;
+  }
+
   public setJwtService(jwtService: JwtService): void {
     this.jwtService = jwtService;
   }
 
-  public async generateAuthorizationUri(): Promise<string> {
+  public async generateAuthorizationUri(hostname: string): Promise<string> {
     if (!this.jwtService) {
       throw new Error('JwtService not set');
     }
@@ -41,7 +50,7 @@ export default class OAuth2Client {
     const options = {
       ...(this.options.callbackUriParams ?? {}),
       ...{
-        redirect_uri: this.options.callbackUri,
+        redirect_uri: this.parseRedirectUri(hostname),
         scope: this.options.scope,
         state: encodedState,
       },
@@ -50,7 +59,10 @@ export default class OAuth2Client {
     return this.authorizationCode.authorizeURL(options);
   }
 
-  public async getToken(codeResponse: CodeResponse): Promise<AccessToken> {
+  public async getToken(
+    codeResponse: CodeResponse,
+    hostname: string,
+  ): Promise<AccessToken> {
     if (!this.jwtService) {
       throw new Error('JwtService not set');
     }
@@ -62,7 +74,7 @@ export default class OAuth2Client {
 
     try {
       const accessToken = await this.authorizationCode.getToken({
-        redirect_uri: this.options.callbackUri,
+        redirect_uri: this.parseRedirectUri(hostname),
         scope: codeResponse.scope,
         code: codeResponse.code,
       });

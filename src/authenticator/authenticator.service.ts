@@ -12,11 +12,8 @@ import {
 import OAuth2Client, { ValidateFunc } from '../classes/OAuth2Client';
 import { CodeResponse, OAuth2Options } from '../@types';
 import { UsersService } from '../users/users.service';
-import appConfig from '../config/app.config.json';
 import { Provider } from '../providers/constants';
-import authConfig from '../config/auth.config';
-
-const isProduction = appConfig.NODE_ENV !== 'development';
+import { isProduction } from '../utils/app';
 
 @Injectable()
 export class AuthenticatorService implements OnModuleInit {
@@ -70,13 +67,14 @@ export class AuthenticatorService implements OnModuleInit {
   public async redirectToAuth(
     name: Provider,
     reply: FastifyReply,
+    request: FastifyRequest,
   ): Promise<true> {
     const client = this.clients.find(({ Name }) => Name === name);
     if (!client) {
       throw new Error(`No client found with name: ${name}`);
     }
 
-    const uri = await client.generateAuthorizationUri();
+    const uri = await client.generateAuthorizationUri(request.hostname);
     reply.redirect(307, uri);
     return true;
   }
@@ -99,11 +97,14 @@ export class AuthenticatorService implements OnModuleInit {
         throw new UnauthorizedException();
       }
 
-      const token = await client.getToken({
-        code,
-        state,
-        scope,
-      });
+      const token = await client.getToken(
+        {
+          code,
+          state,
+          scope,
+        },
+        request.hostname,
+      );
 
       if (!token?.token?.access_token || token?.expired()) {
         throw new UnauthorizedException();
@@ -120,10 +121,10 @@ export class AuthenticatorService implements OnModuleInit {
 
       const session = await this.signData(user.uid);
       reply.setCookie(this.cookieName, session, this.cookieOptions);
-      reply.redirect(307, authConfig.homePage);
+      reply.redirect(307, process.env.HOME_ROUTE);
       return true;
     } catch {
-      reply.redirect(307, authConfig.loginPage);
+      reply.redirect(307, process.env.LOGIN_ROUTE);
       throw new UnauthorizedException();
     }
   }

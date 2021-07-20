@@ -1,6 +1,6 @@
-import { SetMetadata } from '@nestjs/common';
+import { SetMetadata, applyDecorators, Get } from '@nestjs/common';
 
-import { Provider } from '../providers/constants';
+import { Provider, configs } from '../providers/constants';
 import { ValueOf } from '../utils/types';
 
 export const name = 'auth-method' as const;
@@ -18,7 +18,10 @@ export const methods = {
 export type Method = ValueOf<typeof methods>;
 
 export const AuthMethod = (provider: Provider, method: Method) =>
-  SetMetadata(name, {
-    provider,
-    method,
-  } as AuthMethodData);
+  applyDecorators(
+    Get(configs[provider.toString()][method.toString()]),
+    SetMetadata(name, {
+      provider,
+      method,
+    } as AuthMethodData),
+  );

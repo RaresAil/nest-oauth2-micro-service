@@ -1,3 +1,10 @@
-import { GoogleStrategy } from './google/strategy';
+/* eslint-disable @typescript-eslint/no-var-requires */
+/* eslint-disable security/detect-non-literal-require */
+import path from 'path';
 
-export const Strategies = [GoogleStrategy];
+import { providers } from './constants';
+
+export const Strategies = Object.values(providers).map((provider: string) => {
+  const strategy = require(path.join(__dirname, provider, 'strategy'));
+  return strategy.default;
+});

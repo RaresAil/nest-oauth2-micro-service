@@ -3,12 +3,12 @@ import { Injectable } from '@nestjs/common';
 import { AuthenticatorService } from '../../authenticator/authenticator.service';
 import { ValidateFunc } from '../../classes/OAuth2Client';
 import { UsersService } from '../../users/users.service';
-import { OPEN_ID } from '../../config/auth.config';
-import { providers } from '../constants';
+import { OPEN_ID, versions } from '../../utils/app';
+import { providers, scopes } from '../constants';
 import googleConfig from './config';
 
 @Injectable()
-export class GoogleStrategy {
+export default class GoogleStrategy {
   constructor(
     private readonly usersService: UsersService,
     authenticator: AuthenticatorService,
@@ -18,8 +18,8 @@ export class GoogleStrategy {
         name: providers.Google,
         credentials: {
           client: {
-            id: googleConfig.clientID,
-            secret: googleConfig.clientSecret,
+            id: process.env.GOOGLE_CLIENT_ID,
+            secret: process.env.GOOGLE_CLIENT_SECRET,
           },
           auth: {
             authorizeHost: 'https://accounts.google.com',
@@ -29,8 +29,8 @@ export class GoogleStrategy {
             userInfo: OPEN_ID,
           },
         },
-        callbackUri: googleConfig.callbackURL,
-        scope: googleConfig.scope,
+        callbackUri: `/v${versions.v1}/${googleConfig.callbackPath}`,
+        scope: [scopes.Email, scopes.Profile],
       },
       this.validate.bind(this),
     );

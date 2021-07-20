@@ -38,3 +38,5 @@ export interface CodeResponse {
   state: string;
   scope: string;
 }
+
+export * from './user';

@@ -4,7 +4,6 @@ import { AuthenticatorService } from '../../authenticator/authenticator.service'
 import { ValidateFunc } from '../../classes/OAuth2Client';
 import { UsersService } from '../../users/users.service';
 import { OPEN_ID } from '../../config/auth.config';
-import { User } from '../../users/user.class';
 import { providers } from '../constants';
 import googleConfig from './config';
 
@@ -41,24 +40,12 @@ export class GoogleStrategy {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     ...[_, data]: Parameters<ValidateFunc>
   ): ReturnType<ValidateFunc> {
-    const existingUser = await this.usersService.getUser(
-      data.id,
-      providers.Google,
-    );
-    if (existingUser) {
-      return existingUser;
-    }
-
-    const user = await this.usersService.saveUser(
-      new User(
-        data.id,
-        data.given_name,
-        data.family_name,
-        data.email,
-        data.picture,
-        providers.Google,
-      ),
-    );
-    return user;
+    return this.usersService.saveOrUpdate({
+      uid: this.usersService.serializeUser(data.id, providers.Google),
+      firstName: data.given_name,
+      lastName: data.family_name,
+      email: data.email,
+      avatar: data.picture,
+    });
   }
 }

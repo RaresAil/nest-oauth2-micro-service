@@ -15,7 +15,6 @@ import { UsersService } from '../users/users.service';
 import appConfig from '../config/app.config.json';
 import { Provider } from '../providers/constants';
 import authConfig from '../config/auth.config';
-import { User } from '../users/user.class';
 
 const isProduction = appConfig.NODE_ENV !== 'development';
 
@@ -119,7 +118,8 @@ export class AuthenticatorService implements OnModuleInit {
         throw new UnauthorizedException();
       }
 
-      reply.setCookie(this.cookieName, user.serialize(), this.cookieOptions);
+      const session = await this.signData(user.uid);
+      reply.setCookie(this.cookieName, session, this.cookieOptions);
       reply.redirect(307, authConfig.homePage);
       return true;
     } catch {
@@ -132,22 +132,38 @@ export class AuthenticatorService implements OnModuleInit {
     request: FastifyRequest,
     replay: FastifyReply,
   ): Promise<boolean> {
-    const { valid, value } =
-      request.unsignCookie(request.cookies[this.cookieName] ?? '') ??
-      ({} as ReturnType<typeof request['unsignCookie']>);
+    try {
+      const { valid, value: rawValue } =
+        request.unsignCookie(request.cookies[this.cookieName] ?? '') ??
+        ({} as ReturnType<typeof request['unsignCookie']>);
 
-    if (!valid || !value) {
+      if (!valid || !rawValue) {
+        throw new UnauthorizedException();
+      }
+
+      const value = await this.unsignData(rawValue);
+      const { id, provider } = this.usersService.deserializeUser(value);
+      const user = await this.usersService.getUser(id, provider);
+
+      if (!user) {
+        throw new UnauthorizedException();
+      }
+
+      return true;
+    } catch {
       replay.clearCookie(this.cookieName);
       throw new UnauthorizedException();
     }
+  }
 
-    const { id, provider } = User.deserialize(value);
-    const user = await this.usersService.getUser(id, provider);
-    if (!user) {
-      replay.clearCookie(this.cookieName);
-      throw new UnauthorizedException();
-    }
+  private async signData(input: string): Promise<string> {
+    return this.jwtService.signAsync({
+      data: input,
+    });
+  }
 
-    return true;
+  private async unsignData<T = any>(input: string): Promise<T> {
+    const { data } = await this.jwtService.verifyAsync<any>(input);
+    return data;
   }
 }

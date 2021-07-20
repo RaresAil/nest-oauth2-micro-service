@@ -2,12 +2,14 @@ import { AccessToken, AuthorizationCode } from 'simple-oauth2';
 import { JwtService } from '@nestjs/jwt';
 import crypto from 'crypto';
 
-import { CodeResponse, OAuth2Options } from '../@types';
+import { CodeResponse, OAuth2Options, UserModel } from '../@types';
 import { Provider } from '../providers/constants';
 import { OPEN_ID } from '../config/auth.config';
-import { User } from '../users/user.class';
 
-export type ValidateFunc = (accessToken: string, data: any) => Promise<User>;
+export type ValidateFunc = (
+  accessToken: string,
+  data: any,
+) => Promise<UserModel>;
 
 export default class OAuth2Client {
   private readonly stateLength = 32 as const;

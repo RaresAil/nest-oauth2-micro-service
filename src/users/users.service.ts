@@ -4,6 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { Provider, providers } from '../providers/constants';
 import { DeserializedUser, UserModel } from '../@types';
 import { User } from '../models/user.model';
+import { v5 } from 'uuid';
 
 @Injectable()
 export class UsersService {
@@ -12,35 +13,33 @@ export class UsersService {
     private readonly userModel: typeof User,
   ) {}
 
-  private async getRawUser(
-    id: string,
-    provider: Provider,
-  ): Promise<User | null> {
+  private async getRawUser(uid: string): Promise<User | null> {
     return this.userModel.findOne({
       where: {
-        uid: this.serializeUser(id, provider),
+        uid,
       },
     });
   }
 
-  public async getUser(
-    id: string,
-    provider: Provider,
-  ): Promise<UserModel | null> {
-    const user = await this.getRawUser(id, provider);
+  public async getUser(uid: string): Promise<UserModel | null> {
+    const user = await this.getRawUser(uid);
     return (user?.toJSON() as UserModel) ?? null;
   }
 
-  public async saveOrUpdate({
-    uid,
-    ...userInfo
-  }: UserModel): Promise<UserModel | null> {
-    const { id, provider } = this.deserializeUser(uid);
-    const existingUser = await this.getRawUser(id, provider);
+  public async saveOrUpdate(
+    id: string,
+    provider: Provider,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    { uid, ...userInfo }: UserModel,
+  ): Promise<UserModel | null> {
+    const existingUser = await this.getRawUser(
+      this.serializeUser(id, provider, true),
+    );
+
     if (!existingUser) {
       const user = new User({
         ...userInfo,
-        uid,
+        uid: this.serializeUser(id, provider),
       });
 
       return (await user.save()).toJSON() as UserModel;
@@ -59,19 +58,13 @@ export class UsersService {
     );
   }
 
-  public deserializeUser(serializedUser: string): DeserializedUser | null {
-    const [id, provider] = serializedUser.split(':');
-    if (!this.isValidProvider(provider)) {
-      return null;
+  private serializeUser(id: string, provider: Provider, setV5 = false): string {
+    const value = `${id}:${provider}`;
+
+    if (setV5) {
+      return v5(value, process.env.UUID_NAMESPACE);
     }
 
-    return {
-      id,
-      provider: provider as DeserializedUser['provider'],
-    };
-  }
-
-  public serializeUser(id: string, provider: Provider): string {
-    return `${id}:${provider}`;
+    return value;
   }
 }

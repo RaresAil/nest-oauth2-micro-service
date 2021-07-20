@@ -40,8 +40,8 @@ export class GoogleStrategy {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     ...[_, data]: Parameters<ValidateFunc>
   ): ReturnType<ValidateFunc> {
-    return this.usersService.saveOrUpdate({
-      uid: this.usersService.serializeUser(data.id, providers.Google),
+    return this.usersService.saveOrUpdate(data.id, providers.Google, {
+      uid: '',
       firstName: data.given_name,
       lastName: data.family_name,
       email: data.email,

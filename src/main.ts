@@ -21,9 +21,7 @@ async function bootstrap() {
   });
 
   await app.register(fastifyHelmet);
-  await app.register(fastifyCookie, {
-    secret: process.env.SESSION_SECRET,
-  });
+  await app.register(fastifyCookie);
 
   await app.listen(3000);
 }

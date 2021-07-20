@@ -23,7 +23,7 @@ export class AuthenticatorService implements OnModuleInit {
   private cookieName = 'session' as const;
   private cookieOptions: CookieSerializeOptions = {
     httpOnly: true,
-    signed: true,
+    signed: false,
     secure: isProduction,
     maxAge: 21600 * 1000,
     path: '/',
@@ -133,17 +133,8 @@ export class AuthenticatorService implements OnModuleInit {
     replay: FastifyReply,
   ): Promise<boolean> {
     try {
-      const { valid, value: rawValue } =
-        request.unsignCookie(request.cookies[this.cookieName] ?? '') ??
-        ({} as ReturnType<typeof request['unsignCookie']>);
-
-      if (!valid || !rawValue) {
-        throw new UnauthorizedException();
-      }
-
-      const value = await this.unsignData(rawValue);
-      const { id, provider } = this.usersService.deserializeUser(value);
-      const user = await this.usersService.getUser(id, provider);
+      const uuid = await this.unsignData(request.cookies[this.cookieName]);
+      const user = await this.usersService.getUser(uuid);
 
       if (!user) {
         throw new UnauthorizedException();

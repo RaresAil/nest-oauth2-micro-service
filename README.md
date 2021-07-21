@@ -31,21 +31,21 @@
 
 ### ENV File
 
-| Key                  | Value                                               |
-| -------------------- | --------------------------------------------------- |
-| GOOGLE_CLIENT_ID     | \<google_client>                                    |
-| GOOGLE_CLIENT_SECRET | \<google_secret>                                    |
-| LOGIN_ROUTE          | /login                                              |
-| HOME_ROUTE           | /                                                   |
-| DB_DIALECT           | postgres                                            |
-| DB_HOST              | localhost                                           |
-| DB_PORT              | 5432                                                |
-| DB_USER              | \<user>                                             |
-| DB_PASSWORD          | \<database_password>                                |
-| DB_NAME              | \<database_name>                                    |
-| UUID_NAMESPACE       | \<uuid_v5_namespace> (It can be a uuidV4 generated) |
-| JWT_PRIVATE_KEY      | \<rsa_private_key>                                  |
-| JWT_PUBLIC_KEY       | \<rsa_public_key>                                   |
+| Key                  | Value                                                |
+| -------------------- | ---------------------------------------------------- |
+| GOOGLE_CLIENT_ID     | \<google_client>                                     |
+| GOOGLE_CLIENT_SECRET | \<google_secret>                                     |
+| LOGIN_ROUTE          | /login                                               |
+| HOME_ROUTE           | /                                                    |
+| DB_DIALECT           | postgres                                             |
+| DB_HOST              | localhost                                            |
+| DB_PORT              | 5432                                                 |
+| DB_USER              | \<user>                                              |
+| DB_PASSWORD          | \<database_password>                                 |
+| DB_NAME              | \<database_name>                                     |
+| UUID_NAMESPACE       | \<uuid_v5_namespace> (It can be an uuidV4 generated) |
+| JWT_PRIVATE_KEY      | \<rsa_private_key>                                   |
+| JWT_PUBLIC_KEY       | \<rsa_public_key>                                    |
 
 ### How to generate the RSA Key
 

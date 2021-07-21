@@ -5,11 +5,11 @@ import { URL } from 'url';
 
 import { AuthenticatorService } from './authenticator.service';
 import GoogleStrategy from '../providers/google/strategy';
-import { UserModule } from '../user/users.module';
+import { UserModule } from '../user/user.module';
+import { scopes } from '../providers/constants';
 
 import jwtConfig from '../../test/config/jwt.json';
 import dbConfig from '../../test/config/db.json';
-import { scopes } from '../providers/constants';
 
 describe('Authenticator Service', () => {
   let service: AuthenticatorService;

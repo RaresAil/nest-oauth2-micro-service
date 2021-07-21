@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 import { AuthenticatorService } from '../../authenticator/authenticator.service';
 import { ValidateFunc } from '../../classes/OAuth2Client';
-import { UserService } from '../../user/users.service';
+import { UserService } from '../../user/user.service';
 import { OPEN_ID, versions } from '../../utils/app';
 import { providers, scopes } from '../constants';
 import googleConfig from './config';

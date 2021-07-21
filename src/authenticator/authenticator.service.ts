@@ -11,7 +11,7 @@ import {
 
 import OAuth2Client, { ValidateFunc } from '../classes/OAuth2Client';
 import { CodeResponse, OAuth2Options } from '../@types';
-import { UserService } from '../user/users.service';
+import { UserService } from '../user/user.service';
 import { Provider } from '../providers/constants';
 import { isProduction } from '../utils/app';
 

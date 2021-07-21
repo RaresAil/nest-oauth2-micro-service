@@ -3,9 +3,10 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { ModuleRef, Reflector } from '@nestjs/core';
 
 import { AuthenticatorService } from '../authenticator/authenticator.service';
-import { UserModule } from '../user/users.module';
-import dbConfig from '../../test/config/db.json';
+import { UserModule } from '../user/user.module';
 import { AuthGuard } from './auth.guard';
+
+import dbConfig from '../../test/config/db.json';
 
 describe('AuthGuard', () => {
   let module: TestingModule;

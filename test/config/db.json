@@ -1,0 +1,10 @@
+{
+  "database": "mock",
+  "dialect": "sqlite",
+  "username": "root",
+  "password": "",
+  "storage": ":memory:",
+  "autoLoadModels": true,
+  "synchronize": true,
+  "logging": false
+}

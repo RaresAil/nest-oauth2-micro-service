@@ -12,7 +12,7 @@ export type ValidateFunc = (
 ) => Promise<UserModel>;
 
 export default class OAuth2Client {
-  private readonly stateLength = 32 as const;
+  private readonly stateLength = 64 as const;
   private jwtService: JwtService;
 
   public get Name(): Provider {

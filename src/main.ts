@@ -1,3 +1,5 @@
+import './utils/env';
+
 import { VersioningType } from '@nestjs/common';
 import { fastifyHelmet } from 'fastify-helmet';
 import fastifyCookie from 'fastify-cookie';
@@ -6,8 +8,6 @@ import {
   NestFastifyApplication,
   FastifyAdapter,
 } from '@nestjs/platform-fastify';
-
-import './utils/env';
 
 import { AppModule } from './app.module';
 

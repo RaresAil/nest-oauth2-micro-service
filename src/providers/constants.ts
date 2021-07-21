@@ -14,6 +14,8 @@ export const scopes = {
   Profile: 'profile',
 };
 
+// Don't change this. \/
+
 export type Provider = ValueOf<typeof providers>;
 
 export const configs: {

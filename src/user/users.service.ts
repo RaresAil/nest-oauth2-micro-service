@@ -7,7 +7,7 @@ import { User } from '../models/user.model';
 import { v5 } from 'uuid';
 
 @Injectable()
-export class UsersService {
+export class UserService {
   constructor(
     @InjectModel(User)
     private readonly userModel: typeof User,

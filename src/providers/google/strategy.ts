@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 import { AuthenticatorService } from '../../authenticator/authenticator.service';
 import { ValidateFunc } from '../../classes/OAuth2Client';
-import { UsersService } from '../../users/users.service';
+import { UserService } from '../../user/users.service';
 import { OPEN_ID, versions } from '../../utils/app';
 import { providers, scopes } from '../constants';
 import googleConfig from './config';
@@ -10,7 +10,7 @@ import googleConfig from './config';
 @Injectable()
 export default class GoogleStrategy {
   constructor(
-    private readonly usersService: UsersService,
+    private readonly usersService: UserService,
     authenticator: AuthenticatorService,
   ) {
     authenticator.use(

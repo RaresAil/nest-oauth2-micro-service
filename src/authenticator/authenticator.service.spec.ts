@@ -5,20 +5,20 @@ import { URL } from 'url';
 
 import { AuthenticatorService } from './authenticator.service';
 import GoogleStrategy from '../providers/google/strategy';
-import { UsersModule } from '../users/users.module';
+import { UserModule } from '../user/users.module';
 
 import jwtConfig from '../../test/config/jwt.json';
 import dbConfig from '../../test/config/db.json';
 import { scopes } from '../providers/constants';
 
-describe('AuthenticatorService', () => {
+describe('Authenticator Service', () => {
   let service: AuthenticatorService;
   let module: TestingModule;
 
   beforeEach(async () => {
     module = await Test.createTestingModule({
       imports: [
-        UsersModule,
+        UserModule,
         SequelizeModule.forRoot(dbConfig as any),
         JwtModule.register(jwtConfig),
       ],

@@ -11,7 +11,7 @@ import {
 
 import OAuth2Client, { ValidateFunc } from '../classes/OAuth2Client';
 import { CodeResponse, OAuth2Options } from '../@types';
-import { UsersService } from '../users/users.service';
+import { UserService } from '../user/users.service';
 import { Provider } from '../providers/constants';
 import { isProduction } from '../utils/app';
 
@@ -22,7 +22,7 @@ export class AuthenticatorService implements OnModuleInit {
     httpOnly: true,
     signed: false,
     secure: isProduction,
-    maxAge: 21600 * 1000,
+    maxAge: 21600,
     path: '/',
   };
 
@@ -31,7 +31,7 @@ export class AuthenticatorService implements OnModuleInit {
 
   constructor(
     private readonly moduleRef: ModuleRef,
-    private readonly usersService: UsersService,
+    private readonly usersService: UserService,
   ) {}
 
   public onModuleInit() {

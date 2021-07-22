@@ -6,6 +6,8 @@ export interface UserModel {
   lastName: string;
   email: string;
   avatar: string;
+  readonly creationDate?: Date;
+  readonly updatedOn?: Date;
 }
 
 export interface DeserializedUser {

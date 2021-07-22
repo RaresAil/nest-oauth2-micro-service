@@ -12,7 +12,7 @@ describe('AuthGuard', () => {
   let module: TestingModule;
   let authGuard: AuthGuard;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     module = await Test.createTestingModule({
       imports: [UserModule, SequelizeModule.forRoot(dbConfig as any)],
       providers: [AuthenticatorService],

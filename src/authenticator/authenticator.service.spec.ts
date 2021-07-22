@@ -15,7 +15,7 @@ describe('Authenticator Service', () => {
   let service: AuthenticatorService;
   let module: TestingModule;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     module = await Test.createTestingModule({
       imports: [
         UserModule,

@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { SequelizeModule } from '@nestjs/sequelize';
-import { ModuleRef, Reflector } from '@nestjs/core';
+import { ModuleRef } from '@nestjs/core';
 
 import { AuthenticatorService } from '../authenticator/authenticator.service';
 import { UserModule } from '../user/user.module';
@@ -10,7 +10,7 @@ import dbConfig from '../../test/config/db.json';
 
 describe('AuthGuard', () => {
   let module: TestingModule;
-  let authGuard: AuthGuard;
+  let moduleRef: ModuleRef;
 
   beforeAll(async () => {
     module = await Test.createTestingModule({
@@ -18,14 +18,31 @@ describe('AuthGuard', () => {
       providers: [AuthenticatorService],
     }).compile();
 
-    const reflector = module.get<Reflector>(Reflector);
-    const moduleRef = module.get<ModuleRef>(ModuleRef);
-
-    authGuard = new AuthGuard(reflector, moduleRef);
-    authGuard.onModuleInit();
+    moduleRef = module.get<ModuleRef>(ModuleRef);
   });
 
-  it('should be defined', () => {
-    expect(authGuard).toBeDefined();
+  describe('Test invalid method', () => {
+    let authGuard: AuthGuard;
+    beforeAll(async () => {
+      authGuard = new AuthGuard(
+        {
+          get: () => 'invalid',
+        } as any,
+        moduleRef,
+      );
+      authGuard.onModuleInit();
+    });
+
+    it('canActivate should return false because method is not valid', async () => {
+      const value = await authGuard.canActivate({
+        getHandler: () => jest.fn(),
+        switchToHttp: () => ({
+          getRequest: () => null,
+          getResponse: () => null,
+        }),
+      } as any);
+
+      expect(value).toBeFalsy();
+    });
   });
 });

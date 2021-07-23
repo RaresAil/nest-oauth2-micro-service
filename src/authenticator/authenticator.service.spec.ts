@@ -3,10 +3,10 @@ import { JwtModule, JwtService } from '@nestjs/jwt';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { URL } from 'url';
 
-import { AuthenticatorService } from './authenticator.service';
+import { AuthenticatorService, noClientError } from './authenticator.service';
+import { providers, scopes } from '../providers/constants';
 import GoogleStrategy from '../providers/google/strategy';
 import { UserModule } from '../user/user.module';
-import { scopes } from '../providers/constants';
 
 import jwtConfig from '../../test/config/jwt.json';
 import dbConfig from '../../test/config/db.json';
@@ -33,16 +33,17 @@ describe('Authenticator Service', () => {
   });
 
   it('Should fail because provider is not defined', async () => {
+    const name = providers.Google;
     try {
       await service.redirectToAuth(
-        'google',
+        name,
         { redirect: () => true } as any,
         {
           hostname: 'localhost',
         } as any,
       );
     } catch ({ message }) {
-      expect(message).toContain('No client found with name:');
+      expect(message).toBe(noClientError(name));
     }
   });
 
@@ -55,7 +56,7 @@ describe('Authenticator Service', () => {
 
     await new Promise<void>((resolve) => {
       service.redirectToAuth(
-        'google',
+        providers.Google,
         {
           redirect: (code: number, uri: string) => {
             const url = new URL(uri);

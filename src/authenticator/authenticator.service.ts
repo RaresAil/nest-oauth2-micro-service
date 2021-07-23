@@ -15,6 +15,9 @@ import { UserService } from '../user/user.service';
 import { Provider } from '../providers/constants';
 import { isProduction } from '../utils/app';
 
+export const noClientError = (name: string) =>
+  `No client found with name: ${name}`;
+
 @Injectable()
 export class AuthenticatorService implements OnModuleInit {
   private cookieName = 'session' as const;
@@ -71,7 +74,7 @@ export class AuthenticatorService implements OnModuleInit {
   ): Promise<true> {
     const client = this.clients.find(({ Name }) => Name === name);
     if (!client) {
-      throw new Error(`No client found with name: ${name}`);
+      throw new Error(noClientError(name));
     }
 
     const uri = await client.generateAuthorizationUri(request.hostname);
@@ -86,7 +89,7 @@ export class AuthenticatorService implements OnModuleInit {
   ): Promise<boolean> {
     const client = this.clients.find(({ Name }) => Name === name);
     if (!client) {
-      throw new Error(`No client found with name: ${name}`);
+      throw new Error(noClientError(name));
     }
 
     try {

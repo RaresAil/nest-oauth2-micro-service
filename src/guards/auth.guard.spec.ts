@@ -2,8 +2,13 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { ModuleRef } from '@nestjs/core';
 
-import { AuthenticatorService } from '../authenticator/authenticator.service';
+import { methods } from '../meta/auth-method.decorator';
+import { providers } from '../providers/constants';
 import { UserModule } from '../user/user.module';
+import {
+  AuthenticatorService,
+  noClientError,
+} from '../authenticator/authenticator.service';
 import { AuthGuard } from './auth.guard';
 
 import dbConfig from '../../test/config/db.json';
@@ -21,19 +26,16 @@ describe('AuthGuard', () => {
     moduleRef = module.get<ModuleRef>(ModuleRef);
   });
 
-  describe('Test invalid method', () => {
-    let authGuard: AuthGuard;
-    beforeAll(async () => {
-      authGuard = new AuthGuard(
+  describe('Failing cases', () => {
+    it('canActivate should return false because method is not valid', async () => {
+      const authGuard = new AuthGuard(
         {
-          get: () => 'invalid',
+          get: () => ({}),
         } as any,
         moduleRef,
       );
       authGuard.onModuleInit();
-    });
 
-    it('canActivate should return false because method is not valid', async () => {
       const value = await authGuard.canActivate({
         getHandler: () => jest.fn(),
         switchToHttp: () => ({
@@ -43,6 +45,32 @@ describe('AuthGuard', () => {
       } as any);
 
       expect(value).toBeFalsy();
+    });
+
+    it('canActivate should throw an error because provider is not defined', async () => {
+      const name = providers.Google;
+      const authGuard = new AuthGuard(
+        {
+          get: () => ({
+            method: methods.Authorize,
+            provider: name,
+          }),
+        } as any,
+        moduleRef,
+      );
+      authGuard.onModuleInit();
+
+      try {
+        await authGuard.canActivate({
+          getHandler: () => jest.fn(),
+          switchToHttp: () => ({
+            getRequest: () => null,
+            getResponse: () => null,
+          }),
+        } as any);
+      } catch ({ message }) {
+        expect(message).toBe(noClientError(name));
+      }
     });
   });
 });

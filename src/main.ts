@@ -14,7 +14,9 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
-    new FastifyAdapter(),
+    new FastifyAdapter({
+      trustProxy: process.env.PROXY_IP ?? false,
+    }),
   );
   app.enableVersioning({
     type: VersioningType.URI,

@@ -3,6 +3,7 @@ import { FastifyReply, FastifyRequest } from 'fastify';
 import { AuthorizationCode } from 'simple-oauth2';
 import { JwtService } from '@nestjs/jwt';
 import { ModuleRef } from '@nestjs/core';
+import { v5 } from 'uuid';
 import {
   UnauthorizedException,
   OnModuleInit,
@@ -93,8 +94,10 @@ export class AuthenticatorService implements OnModuleInit {
     try {
       const { code, state, scope }: CodeResponse = (request.query ??
         {}) as CodeResponse;
+      const userAgent = this.getUserAgent(request);
+      const ip = this.getRealIp(request);
 
-      if (!code || !state || !scope) {
+      if (!userAgent || !ip || !code || !state || !scope) {
         throw new UnauthorizedException();
       }
 
@@ -120,7 +123,7 @@ export class AuthenticatorService implements OnModuleInit {
         throw new UnauthorizedException();
       }
 
-      const session = await this.signData(user.uid);
+      const session = await this.signData(user.uid, userAgent, ip);
       reply.setCookie(this.cookieName, session, this.cookieOptions);
       reply.redirect(307, process.env.HOME_ROUTE);
       return true;
@@ -135,7 +138,11 @@ export class AuthenticatorService implements OnModuleInit {
     replay: FastifyReply,
   ): Promise<boolean> {
     try {
-      const uuid = await this.unsignData(request.cookies[this.cookieName]);
+      const uuid = await this.unsignData(
+        request.cookies[this.cookieName],
+        this.getUserAgent(request),
+        this.getRealIp(request),
+      );
       const user = await this.usersService.getUser(uuid);
 
       if (!user) {
@@ -149,14 +156,55 @@ export class AuthenticatorService implements OnModuleInit {
     }
   }
 
-  private async signData(input: string): Promise<string> {
+  private getUserAgent(request: FastifyRequest): string | undefined {
+    return request.headers['user-agent'];
+  }
+
+  private getRealIp(request: FastifyRequest): string | undefined {
+    if (process.env.PROXY_IP) {
+      return request.headers['x-real-ip'] as string;
+    }
+
+    return request.ip;
+  }
+
+  private toUUID(input: string): string {
+    return v5(input, process.env.UUID_NAMESPACE);
+  }
+
+  private async signData(
+    input: string,
+    userAgent: string,
+    ip: string,
+  ): Promise<string> {
     return this.jwtService.signAsync({
-      data: input,
+      data: [input, this.toUUID(userAgent), this.toUUID(ip)],
     });
   }
 
-  private async unsignData(input: string): Promise<string> {
-    const { data } = await this.jwtService.verifyAsync(input);
-    return data;
+  private async unsignData(
+    input: string,
+    userAgent?: string,
+    ip?: string,
+  ): Promise<string | null> {
+    if (!userAgent || !ip) {
+      return null;
+    }
+
+    const { data } = (await this.jwtService.verifyAsync(input)) ?? { data: [] };
+    const [userId, userAgentFromToken, ipFromToken]: string[] = data ?? [];
+    if (!userId || !userAgentFromToken || !ipFromToken) {
+      return null;
+    }
+
+    if (this.toUUID(userAgent) !== userAgentFromToken) {
+      return null;
+    }
+
+    if (this.toUUID(ip) !== ipFromToken) {
+      return null;
+    }
+
+    return userId;
   }
 }

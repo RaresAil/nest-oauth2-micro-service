@@ -1,10 +1,10 @@
 import { InjectModel } from '@nestjs/sequelize';
 import { Injectable } from '@nestjs/common';
+import { v5 } from 'uuid';
 
 import { Provider, providers } from '../providers/constants';
 import { DeserializedUser, UserModel } from '../@types';
 import { User } from '../models/user.model';
-import { v5 } from 'uuid';
 
 @Injectable()
 export class UserService {
@@ -21,7 +21,11 @@ export class UserService {
     });
   }
 
-  public async getUser(uid: string): Promise<UserModel | null> {
+  public async getUser(uid?: string | null): Promise<UserModel | null> {
+    if (!uid) {
+      return null;
+    }
+
     const user = await this.getRawUser(uid);
     return (user?.toJSON() as UserModel) ?? null;
   }

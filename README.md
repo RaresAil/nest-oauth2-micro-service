@@ -46,6 +46,10 @@
 | UUID_NAMESPACE       | \<uuid_v5_namespace> (It can be an uuidV4 generated) |
 | JWT_PRIVATE_KEY      | \<rsa_private_key>                                   |
 | JWT_PUBLIC_KEY       | \<rsa_public_key>                                    |
+| PROXY_IP             | \<ip_address> (The ip for the proxy) (OPTIONAL)      |
+
+For `PROXY_IP`, it has to be the ip for the proxy that the app is used from,
+e.g. `127.0.0.1` for a local proxy.
 
 ### How to generate the RSA Key
 

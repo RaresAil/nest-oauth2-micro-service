@@ -37,11 +37,9 @@ export default class GoogleStrategy {
   }
 
   private async validate(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    ...[_, data]: Parameters<ValidateFunc>
+    ...[, data]: Parameters<ValidateFunc>
   ): ReturnType<ValidateFunc> {
     return this.usersService.saveOrUpdate(data.id, providers.Google, {
-      uid: '',
       firstName: data.given_name,
       lastName: data.family_name,
       email: data.email,

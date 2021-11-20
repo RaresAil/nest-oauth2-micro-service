@@ -50,16 +50,14 @@ export class AuthenticatorService implements OnModuleInit {
       throw new Error(`OAuth2 client with name ${options.name} already exists`);
     }
 
-    const {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      auth: { userInfo: _, ...auth },
-      client,
-    } = options.credentials;
+    const auth = { ...options.credentials.auth };
+    delete auth.userInfo;
+
     const oAuthClient = new OAuth2Client(
       options,
       new AuthorizationCode({
-        auth,
-        client,
+        auth: { ...auth },
+        client: { ...options.credentials.client },
       }),
       validate,
     );
@@ -157,8 +155,8 @@ export class AuthenticatorService implements OnModuleInit {
     });
   }
 
-  private async unsignData<T = any>(input: string): Promise<T> {
-    const { data } = await this.jwtService.verifyAsync<any>(input);
+  private async unsignData(input: string): Promise<string> {
+    const { data } = await this.jwtService.verifyAsync(input);
     return data;
   }
 }

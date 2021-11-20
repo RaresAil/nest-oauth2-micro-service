@@ -91,12 +91,18 @@ export default class OAuth2Client {
     let _data = { ...data };
 
     if (this.options.credentials.auth.userInfo === OPEN_ID) {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { iss, azp, aud, sub, at_hash, iat, exp, ...restData } = JSON.parse(
+      const { sub, ...parsedData } = JSON.parse(
         Buffer.from(data.id_token.split('.')[1] ?? '', 'base64').toString(),
       );
 
-      _data = { ...restData, id: sub };
+      delete parsedData.iss;
+      delete parsedData.azp;
+      delete parsedData.aud;
+      delete parsedData.at_hash;
+      delete parsedData.iat;
+      delete parsedData.exp;
+
+      _data = { ...parsedData, id: sub };
     }
 
     return this.validate(accessToken, _data);

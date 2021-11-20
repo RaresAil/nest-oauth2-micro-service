@@ -29,8 +29,7 @@ export class UserService {
   public async saveOrUpdate(
     id: string,
     provider: Provider,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    { uid, ...userInfo }: UserModel,
+    userInfo: Omit<UserModel, 'uid'>,
   ): Promise<UserModel | null> {
     const existingUser = await this.getRawUser(
       this.serializeUser(id, provider, true),

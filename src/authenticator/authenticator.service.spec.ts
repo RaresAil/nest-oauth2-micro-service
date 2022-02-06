@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { JwtModule, JwtService } from '@nestjs/jwt';
-import { SequelizeModule } from '@nestjs/sequelize';
 import { URL } from 'url';
 
 import { AuthenticatorService, noClientError } from './authenticator.service';
@@ -9,7 +8,6 @@ import GoogleStrategy from '../providers/google/strategy';
 import { UserModule } from '../user/user.module';
 
 import jwtConfig from '../../test/config/jwt.json';
-import dbConfig from '../../test/config/db.json';
 
 describe('Authenticator Service', () => {
   let service: AuthenticatorService;
@@ -19,7 +17,7 @@ describe('Authenticator Service', () => {
     module = await Test.createTestingModule({
       imports: [
         UserModule,
-        SequelizeModule.forRoot(dbConfig as any),
+        // SequelizeModule.forRoot(dbConfig as any),
         JwtModule.register(jwtConfig),
       ],
       providers: [AuthenticatorService],

@@ -1,5 +1,4 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { SequelizeModule } from '@nestjs/sequelize';
 import { ModuleRef } from '@nestjs/core';
 
 import { methods } from '../meta/auth-method.decorator';
@@ -11,15 +10,13 @@ import {
 } from '../authenticator/authenticator.service';
 import { AuthGuard } from './auth.guard';
 
-import dbConfig from '../../test/config/db.json';
-
 describe('AuthGuard', () => {
   let module: TestingModule;
   let moduleRef: ModuleRef;
 
   beforeAll(async () => {
     module = await Test.createTestingModule({
-      imports: [UserModule, SequelizeModule.forRoot(dbConfig as any)],
+      imports: [UserModule],
       providers: [AuthenticatorService],
     }).compile();
 

@@ -1,15 +1,13 @@
 import { AccessToken, AuthorizationCode } from 'simple-oauth2';
 import { JwtService } from '@nestjs/jwt';
+import { User } from '@prisma/client';
 import crypto from 'crypto';
 
-import { CodeResponse, OAuth2Options, UserModel } from '../@types';
+import { CodeResponse, OAuth2Options } from '../@types';
 import { isProduction, OPEN_ID } from '../utils/app';
 import { Provider } from '../providers/constants';
 
-export type ValidateFunc = (
-  accessToken: string,
-  data: any,
-) => Promise<UserModel>;
+export type ValidateFunc = (accessToken: string, data: any) => Promise<User>;
 
 export default class OAuth2Client {
   private readonly stateLength = 64 as const;

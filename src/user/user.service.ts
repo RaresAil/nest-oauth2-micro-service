@@ -1,58 +1,52 @@
-import { InjectModel } from '@nestjs/sequelize';
 import { Injectable } from '@nestjs/common';
+import { User } from '@prisma/client';
 import { v5 } from 'uuid';
 
 import { Provider, providers } from '../providers/constants';
-import { DeserializedUser, UserModel } from '../@types';
-import { User } from '../models/user.model';
+import { PrismaService } from '../prisma/prisma.service';
+import { DeserializedUser } from '../@types';
 
 @Injectable()
 export class UserService {
-  constructor(
-    @InjectModel(User)
-    private readonly userModel: typeof User,
-  ) {}
+  constructor(private prisma: PrismaService) {}
 
-  private async getRawUser(uid: string): Promise<User | null> {
-    return this.userModel.findOne({
+  public async getUser(uid?: string | null): Promise<User | null> {
+    if (!uid) {
+      return null;
+    }
+
+    return this.prisma.user.findUnique({
       where: {
         uid,
       },
     });
   }
 
-  public async getUser(uid?: string | null): Promise<UserModel | null> {
-    if (!uid) {
-      return null;
-    }
-
-    const user = await this.getRawUser(uid);
-    return (user?.toJSON() as UserModel) ?? null;
-  }
-
   public async saveOrUpdate(
     id: string,
     provider: Provider,
-    userInfo: Omit<UserModel, 'uid'>,
-  ): Promise<UserModel | null> {
-    const existingUser = await this.getRawUser(
-      this.serializeUser(id, provider, true),
-    );
+    userInfo: Omit<User, 'uid' | 'creationDate' | 'updatedOn'>,
+  ): Promise<User | null> {
+    const uid = this.serializeUser(id, provider, true);
+    const existingUser = await this.getUser(uid);
 
     if (!existingUser) {
-      const user = new User({
-        ...userInfo,
-        uid: this.serializeUser(id, provider),
+      return this.prisma.user.create({
+        data: {
+          ...userInfo,
+          uid: this.serializeUser(id, provider, true),
+        },
       });
-
-      return (await user.save()).toJSON() as UserModel;
     }
 
-    return (
-      await existingUser.update({
+    return this.prisma.user.update({
+      data: {
         ...userInfo,
-      })
-    ).toJSON() as UserModel;
+      },
+      where: {
+        uid,
+      },
+    });
   }
 
   public isValidProvider(provider: string): boolean {

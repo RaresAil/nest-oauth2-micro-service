@@ -9,6 +9,7 @@ import {
   FastifyAdapter,
 } from '@nestjs/platform-fastify';
 
+import { PrismaService } from './prisma/prisma.service';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -24,6 +25,9 @@ async function bootstrap() {
 
   await app.register(fastifyHelmet);
   await app.register(fastifyCookie);
+
+  const prismaService: PrismaService = app.get(PrismaService);
+  await prismaService.enableShutdownHooks(app);
 
   await app.listen(3000);
 }

@@ -1,30 +1,38 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { SequelizeModule } from '@nestjs/sequelize';
+import { User } from '@prisma/client';
 import { v4, version } from 'uuid';
 
 import { providers } from '../providers/constants';
 import { UserService } from './user.service';
-import { User } from '../models/user.model';
-import { UserModel } from '../@types';
 
+import { PrismaService } from '../prisma/prisma.service';
+import mockPrismaService from '../../test/mocks/prisma';
 import userConstants from '../../test/constants/user';
-import dbConfig from '../../test/config/db.json';
 
 describe('UserService', () => {
-  let service: UserService;
+  let prismaService: typeof mockPrismaService;
   let createdUserId: string;
+  let service: UserService;
+
+  afterEach(() => {
+    prismaService.user.create.mockRestore();
+    prismaService.user.update.mockRestore();
+    prismaService.user.findUnique.mockRestore();
+  });
 
   beforeAll(async () => {
     process.env.UUID_NAMESPACE = v4();
-
     const module: TestingModule = await Test.createTestingModule({
-      imports: [
-        SequelizeModule.forRoot(dbConfig as any),
-        SequelizeModule.forFeature([User]),
+      providers: [
+        UserService,
+        {
+          provide: PrismaService,
+          useValue: mockPrismaService,
+        },
       ],
-      providers: [UserService],
     }).compile();
 
+    prismaService = module.get<PrismaService>(PrismaService) as any;
     service = module.get<UserService>(UserService);
   });
 
@@ -33,6 +41,7 @@ describe('UserService', () => {
   });
 
   it("Should return null because user doesn't exists", async () => {
+    prismaService.user.findUnique.mockReturnValueOnce(null);
     const user = await service.getUser(userConstants.fakeId);
     expect(user).toBeNull();
   });
@@ -48,12 +57,20 @@ describe('UserService', () => {
   });
 
   it('Should create an user', async () => {
+    const date = new Date(Date.now() - 10000);
+    prismaService.user.findUnique.mockReturnValueOnce(null);
+    prismaService.user.create.mockImplementationOnce((entry) => ({
+      ...entry?.data,
+      creationDate: date,
+      updatedOn: date,
+    }));
+
     const { creationDate, updatedOn, ...user } =
       (await service.saveOrUpdate(
         userConstants.mockedId,
         providers.Google,
         userConstants.mockedUser,
-      )) ?? ({} as UserModel);
+      )) ?? ({} as User);
 
     expect(creationDate).toBeDefined();
     expect(updatedOn).toBeDefined();
@@ -73,8 +90,15 @@ describe('UserService', () => {
 
   it('Should return a valid user', async () => {
     expect(createdUserId).toBeDefined();
+    prismaService.user.findUnique.mockReturnValueOnce({
+      ...userConstants.mockedUser,
+      uid: createdUserId,
+      creationDate: new Date(),
+      updatedOn: new Date(),
+    });
+
     const { creationDate, updatedOn, ...user } =
-      (await service.getUser(createdUserId)) ?? ({} as UserModel);
+      (await service.getUser(createdUserId)) ?? ({} as User);
 
     expect(creationDate).toBeDefined();
     expect(updatedOn).toBeDefined();

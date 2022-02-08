@@ -1,5 +1,3 @@
-import './utils/env';
-
 import { VersioningType } from '@nestjs/common';
 import { fastifyHelmet } from 'fastify-helmet';
 import fastifyCookie from 'fastify-cookie';
